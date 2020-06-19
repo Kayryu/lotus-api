@@ -1,0 +1,6 @@
+
+struct ChainApi;
+
+impl ChainApi {
+
+}
