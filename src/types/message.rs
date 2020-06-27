@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 use num_bigint::{BigInt};
+use super::crypto::Signature;
+use super::address::Address;
+
 
 /// The signed message (a message with signature).
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Serialize, Deserialize)]
@@ -36,7 +39,7 @@ pub struct UnsignedMessage {
     pub gas_limit: BigInt,
 
     /// The method.
-    pub method: MethodNum,
+    pub method: u64,
     /// The params of method.
     #[serde(with = "plum_bytes")]
     pub params: Vec<u8>,

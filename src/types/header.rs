@@ -1,8 +1,11 @@
 use serde::{Deserialize, Serialize};
+use cid::Cid;
+use num_bigint::BigInt;
 
 use super::address::Address;
 use super::ticket::Ticket;
 use super::election_proof::ElectionProof;
+use super::crypto::Signature;
 
 /// The header part of the block.
 #[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
