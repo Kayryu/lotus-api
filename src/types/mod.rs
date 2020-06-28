@@ -1,18 +1,18 @@
-mod constants;
-mod address;
+pub mod constants;
+pub mod address;
 pub mod utils;
-mod crypto;
-mod bytes;
-mod message;
-mod ticket;
-mod proofs;
-mod header;
-mod block;
+pub mod crypto;
+pub mod bytes;
+pub mod message;
+pub mod ticket;
+pub mod proofs;
+pub mod header;
+pub mod block;
 
-mod hash;
-mod common;
-mod version;
-mod tipset;
+pub mod hash;
+pub mod common;
+pub mod version;
+pub mod tipset;
 
 pub use bytes::{Bytes, BytesRef};
 pub use version::Version;
