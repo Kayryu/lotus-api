@@ -1,5 +1,9 @@
-use serde::{Serialize, Deserialize};
+use serde::{de, ser, Serialize, Deserialize};
 use std::convert::TryFrom;
+use thiserror::Error;
+use super::bytes::Bytes;
+
+use super::address::Protocol;
 
 #[derive(Eq, PartialEq, Debug, Clone, Copy, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -8,6 +12,25 @@ pub enum SignatureType {
     Secp256k1 = 1,
     /// The `BLS` signature.
     Bls = 2,
+}
+
+#[derive(Debug, Eq, PartialEq, Error)]
+pub enum CryptoError {
+    /// Unknown signature type.
+    #[error("unknown signature type: {0}")]
+    UnknownSignatureType(u8),
+    /// Secp256k1 error.
+    #[error("secp256k1 error: {0}")]
+    Secp256k1(#[from] secp256k1::Error),
+    /// BLS error.
+    #[error("bls error: {0}")]
+    Bls(String),
+    /// Signature and Address are not match
+    #[error("signature and address is not same type, signature:{:0?}, addr:{1}")]
+    NotSameType(SignatureType, Protocol),
+    /// Signature verify failed
+    #[error("signature verify failed")]
+    VerifyFailed,
 }
 
 impl Default for SignatureType {
@@ -44,9 +67,21 @@ pub struct Signature {
     /// The signature type.
     r#type: SignatureType,
     /// Tha actual signature bytes.
-    /// secp256k1: signature (64 bytes) + recovery_id (1 byte)
-    /// bls: signature (96 bytes)
-    #[serde(with = "plum_bytes")]
-    data: Vec<u8>,
+    data: Bytes,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::Signature;
+    use crate::types::crypto::{SignatureType, Bytes};
+    use serde_json;
+    #[test]
+    fn signature_json_serde() {
+        let s = Signature {
+            r#type: SignatureType::Secp256k1,
+            data: Bytes::default(),
+        };
+
+        println!("s {}", serde_json::to_string(&s).unwrap());
+    }
+}

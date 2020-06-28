@@ -4,8 +4,21 @@ use num_bigint::BigInt;
 
 use super::address::Address;
 use super::ticket::Ticket;
-use super::election_proof::ElectionProof;
+use super::proofs::{ElectionProof, PoStProof};
 use super::crypto::Signature;
+use super::utils::{vec_cid_json, cid_json, bytes_json, bigint_json};
+
+pub type ChainEpoch = i64;
+
+#[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct BeaconEntry {
+    ///
+    pub round: u64,
+    ///
+    #[serde(with = "bytes_json")]
+    pub data: Vec<u8>,
+}
 
 /// The header part of the block.
 #[derive(Eq, PartialEq, Debug, Clone, Hash, Serialize, Deserialize)]
@@ -23,6 +36,7 @@ pub struct BlockHeader {
     #[serde(rename = "WinPoStProof")]
     pub win_post_proof: Vec<PoStProof>,
     ///
+    #[serde(with = "vec_cid_json")]
     pub parents: Vec<Cid>,
     ///
     #[serde(with = "bigint_json")]
@@ -30,10 +44,13 @@ pub struct BlockHeader {
     ///
     pub height: ChainEpoch,
     ///
+    #[serde(with = "cid_json")]
     pub parent_state_root: Cid,
     ///
+    #[serde(with = "cid_json")]
     pub parent_message_receipts: Cid,
     ///
+    #[serde(with = "cid_json")]
     pub messages: Cid,
     ///
     #[serde(rename = "BLSAggregate")]

@@ -1,6 +1,8 @@
 use serde::{de, ser};
 use thiserror::Error;
 use std::str::FromStr;
+use std::fmt::{self, Display};
+use std::convert::TryFrom;
 use super::constants::*;
 
 pub static NETWORK_DEFAULT:Network = Network::Main;
@@ -42,6 +44,37 @@ pub enum Protocol {
     Actor = 2,
     /// `BLS` protocol, identifier: 3.
     Bls = 3,
+}
+
+impl TryFrom<u8> for Protocol {
+    type Error = AddressError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Protocol::Id),
+            1 => Ok(Protocol::Secp256k1),
+            2 => Ok(Protocol::Actor),
+            3 => Ok(Protocol::Bls),
+            _ => Err(AddressError::UnknownProtocol),
+        }
+    }
+}
+
+impl From<Protocol> for u8 {
+    fn from(protocol: Protocol) -> Self {
+        match protocol {
+            Protocol::Id => 0,
+            Protocol::Secp256k1 => 1,
+            Protocol::Actor => 2,
+            Protocol::Bls => 3,
+        }
+    }
+}
+
+impl fmt::Display for Protocol {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", u8::from(*self))
+    }
 }
 
 /// Errors generated from this library.
@@ -92,12 +125,12 @@ impl Address {
         match protocol {
             Protocol::Id => {}
             Protocol::Secp256k1 | Protocol::Actor => {
-                if payload.len() != constant::PAYLOAD_HASH_LEN {
+                if payload.len() != PAYLOAD_HASH_LEN {
                     return Err(AddressError::InvalidPayload);
                 }
             }
             Protocol::Bls => {
-                if payload.len() != constant::BLS_PUBLIC_KEY_LEN {
+                if payload.len() != BLS_PUBLIC_KEY_LEN {
                     return Err(AddressError::InvalidPayload);
                 }
             }
@@ -115,9 +148,9 @@ impl Address {
 
     /// Create an address using the `Secp256k1` protocol.
     pub fn new_secp256k1_addr(pubkey: &[u8]) -> Result<Self, AddressError> {
-        if pubkey.len() != constant::SECP256K1_FULL_PUBLIC_KEY_LEN
-            && pubkey.len() != constant::SECP256K1_RAW_PUBLIC_KEY_LEN
-            && pubkey.len() != constant::SECP256K1_COMPRESSED_PUBLIC_KEY_LEN
+        if pubkey.len() != SECP256K1_FULL_PUBLIC_KEY_LEN
+            && pubkey.len() != SECP256K1_RAW_PUBLIC_KEY_LEN
+            && pubkey.len() != SECP256K1_COMPRESSED_PUBLIC_KEY_LEN
         {
             return Err(AddressError::InvalidPayload);
         }
@@ -145,7 +178,7 @@ impl Address {
 
     /// Return the network type of the address.
     pub fn network(&self) -> Network {
-        **NETWORK_DEFAULT
+        NETWORK_DEFAULT
     }
 
     /// Return the protocol of the address.
@@ -191,7 +224,7 @@ impl Address {
         payload_size: usize,
     ) -> Result<Self, AddressError> {
         let decoded = base32_decode(raw)?;
-        let (payload, checksum) = decoded.split_at(decoded.len() - constant::CHECKSUM_HASH_LEN);
+        let (payload, checksum) = decoded.split_at(decoded.len() - CHECKSUM_HASH_LEN);
         if payload.len() != payload_size {
             return Err(AddressError::InvalidPayload);
         }
@@ -207,6 +240,37 @@ impl Address {
             protocol,
             payload: payload.to_vec(),
         })
+    }
+}
+
+impl Display for Address {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.protocol() {
+            Protocol::Id => {
+                let id = unsigned_varint::decode::u64(self.payload())
+                    .expect("unsigned varint decode shouldn't be fail")
+                    .0;
+                write!(
+                    f,
+                    "{}{}{}",
+                    NETWORK_DEFAULT.prefix(),
+                    self.protocol() as u8,
+                    id
+                )
+            }
+            Protocol::Secp256k1 | Protocol::Actor | Protocol::Bls => {
+                let mut payload_and_checksum = self.payload().to_vec();
+                payload_and_checksum.extend_from_slice(&checksum(&self.as_bytes()));
+                let base32 = base32_encode(payload_and_checksum);
+                write!(
+                    f,
+                    "{}{}{}",
+                    NETWORK_DEFAULT.prefix(),
+                    self.protocol() as u8,
+                    base32
+                )
+            }
+        }
     }
 }
 
@@ -283,26 +347,54 @@ impl<'de> de::Deserialize<'de> for Address {
     }
 }
 
+/// Validate whether the checksum of `ingest` is equal to `expect`.
+pub fn validate_checksum(ingest: &[u8], expect: &[u8]) -> bool {
+    let digest = checksum(ingest);
+    digest.as_slice() == expect
+}
+
+pub fn blake2b_variable<T: AsRef<[u8]>>(data: T, length: usize) -> Vec<u8> {
+    assert!(length <= blake2b_simd::OUTBYTES);
+    let hash = blake2b_simd::Params::new()
+        .hash_length(length)
+        .to_state()
+        .update(data.as_ref())
+        .finalize();
+
+    let res = hash.as_bytes().to_vec();
+    assert_eq!(res.len(), length);
+    res
+}
+
+/// Return the checksum of ingest.
+pub fn checksum(ingest: &[u8]) -> Vec<u8> {
+    blake2b_variable(ingest, CHECKSUM_HASH_LEN)
+}
+
+fn address_hash(ingest: &[u8]) -> Vec<u8> {
+    blake2b_variable(ingest, PAYLOAD_HASH_LEN)
+}
+
+fn base32_encode(input: impl AsRef<[u8]>) -> String {
+    data_encoding::BASE32_NOPAD
+        .encode(input.as_ref())
+        .to_ascii_lowercase()
+}
+
+fn base32_decode(input: impl AsRef<[u8]>) -> Result<Vec<u8>, AddressError> {
+    Ok(data_encoding::BASE32_NOPAD.decode(&input.as_ref().to_ascii_uppercase())?)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{set_network, Address, Network};
-
-    #[test]
-    fn address_cbor_serde() {
-        let id_addr = Address::new_id_addr(12_512_063u64).unwrap();
-        let ser = minicbor::to_vec(&id_addr).unwrap();
-        assert_eq!(ser, [69, 0, 191, 214, 251, 5]);
-        let de = minicbor::decode::<Address>(&ser).unwrap();
-        assert_eq!(de, id_addr);
-    }
+    use super::{Address, Network};
 
     #[test]
     fn address_json_serde() {
-        unsafe { set_network(Network::Test) };
         let id_addr = Address::new_id_addr(1024).unwrap();
-        assert_eq!(id_addr.to_string(), "t01024");
+        assert_eq!(id_addr.to_string(), "f01024");
         let ser = serde_json::to_string(&id_addr).unwrap();
-        assert_eq!(ser, "\"t01024\"");
+        assert_eq!(ser, "\"f01024\"");
         let de = serde_json::from_str::<Address>(&ser).unwrap();
         assert_eq!(de, id_addr);
     }
