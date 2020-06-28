@@ -1,3 +1,7 @@
+use serde::{de::{self, SeqAccess, Visitor}, ser};
+use serde::Deserialize;
+use std::marker::PhantomData;
+use std::fmt;
 
 pub mod bigint_json {
     use num_bigint::BigInt;
@@ -42,27 +46,6 @@ pub mod bytes_json {
     }
 }
 
-//pub mod cid_json {
-//    use cid::Cid;
-//    use serde::{de, ser, Deserialize, Serialize};
-//    /// Implement JSON serialization of Cid.
-//    pub fn serialize<S>(cid: &Cid, serializer: S) -> Result<S::Ok, S::Error>
-//        where
-//            S: ser::Serializer,
-//    {
-//        cid.to_string().serialize(serializer)
-//    }
-//
-//    /// Implement JSON deserialization of Cid.
-//    pub fn deserialize<'de, D>(deserializer: D) -> Result<Cid, D::Error>
-//        where
-//            D: de::Deserializer<'de>,
-//    {
-//        cid::decode(String::deserialize(deserializer)?)
-//            .map_err(|err| de::Error::custom(format!("base64 decode error: {}", err)))
-//    }
-//}
-
 pub mod cid_json {
     use cid::Cid;
     use serde::{de, ser, Deserialize, Serialize};
@@ -105,11 +88,6 @@ pub mod cid_json {
         cid: String,
     }
 }
-
-use serde::de::{self, SeqAccess, Visitor};
-use serde::Deserialize;
-use std::marker::PhantomData;
-use std::fmt;
 
 #[derive(Default)]
 pub struct GoVecVisitor<T, D = T> {
@@ -187,6 +165,99 @@ pub mod vec_cid_json {
     }
 }
 
+/// A wrapper of `libp2p_core::PeerId` that implement CBOR and JSON serialization/deserialization.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PeerIdWrapper(libp2p_core::PeerId);
+
+impl PeerIdWrapper {
+    /// Consumes the wrapper, returning the underlying libp2p_core::PeerId.
+    pub fn into_inner(self) -> libp2p_core::PeerId {
+        self.0
+    }
+
+    /// Don't consume the wrapper, borrowing the underlying libp2p_core::PeerId.
+    pub fn as_inner(&self) -> &libp2p_core::PeerId {
+        &self.0
+    }
+
+    /// Don't consume the wrapper, mutable borrowing the underlying libp2p_core::PeerId.
+    pub fn as_mut_inner(&mut self) -> &mut libp2p_core::PeerId {
+        &mut self.0
+    }
+}
+
+impl From<libp2p_core::PeerId> for PeerIdWrapper {
+    fn from(peer_id: libp2p_core::PeerId) -> Self {
+        Self(peer_id)
+    }
+}
+
+impl ser::Serialize for PeerIdWrapper {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: ser::Serializer,
+    {
+        peerid_json::serialize(self.as_inner(), serializer)
+    }
+}
+
+// Implement JSON deserialization for PeerIdWrapper.
+impl<'de> de::Deserialize<'de> for PeerIdWrapper {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: de::Deserializer<'de>,
+    {
+        Ok(Self(peerid_json::deserialize(deserializer)?))
+    }
+}
+
+pub struct PeerIdRefWrapper<'a>(&'a libp2p_core::PeerId);
+
+impl<'a> PeerIdRefWrapper<'a> {
+    /// Don't consume the wrapper, borrowing the underlying libp2p_core::PeerId.
+    pub fn as_inner(&self) -> &libp2p_core::PeerId {
+        self.0
+    }
+}
+
+impl<'a> From<&'a libp2p_core::PeerId> for PeerIdRefWrapper<'a> {
+    fn from(peer_id: &'a libp2p_core::PeerId) -> Self {
+        Self(peer_id)
+    }
+}
+
+impl<'a> ser::Serialize for PeerIdRefWrapper<'a> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: ser::Serializer,
+    {
+        peerid_json::serialize(self.as_inner(), serializer)
+    }
+}
+
+pub mod peerid_json {
+    use libp2p_core::PeerId;
+    use serde::{de, ser, Deserialize, Serialize};
+
+    /// JSON serialization
+    pub fn serialize<S>(peer_id: &PeerId, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: ser::Serializer,
+    {
+        peer_id.to_string().serialize(serializer)
+    }
+
+    /// JSON deserialization
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<PeerId, D::Error>
+        where
+            D: de::Deserializer<'de>,
+    {
+        let peer_id = String::deserialize(deserializer)?
+            .parse::<libp2p_core::PeerId>()
+            .map_err(|err| de::Error::custom(err.to_string()))?;
+        Ok(peer_id)
+    }
+}
 //use serde::{de, ser, Deserialize, Serialize};
 //#[derive(Serialize, Deserialize)]
 //struct TT {

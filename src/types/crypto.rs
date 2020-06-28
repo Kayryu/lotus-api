@@ -1,8 +1,8 @@
 use serde::{de, ser, Serialize, Deserialize};
+use serde_repr::{Serialize_repr, Deserialize_repr};
 use std::convert::TryFrom;
 use thiserror::Error;
 use super::bytes::Bytes;
-
 use super::address::Protocol;
 
 #[derive(Eq, PartialEq, Debug, Clone, Copy, Hash, Serialize, Deserialize)]
@@ -68,6 +68,18 @@ pub struct Signature {
     r#type: SignatureType,
     /// Tha actual signature bytes.
     data: Bytes,
+}
+
+#[repr(u8)]
+#[derive(Clone, Debug, Serialize_repr, Deserialize_repr)]
+pub enum DomainSeparationTag {
+    TicketProduction = 1,
+    ElectionProofProduction,
+    WinningPoStChallengeSeed,
+    WindowedPoStChallengeSeed,
+    SealRandomness,
+    InteractiveSealChallengeSeed,
+    WindowedPoStDeadlineAssignment,
 }
 
 #[cfg(test)]
