@@ -7,6 +7,7 @@ use super::ticket::Ticket;
 use super::proofs::{ElectionProof, PoStProof};
 use super::crypto::Signature;
 use super::utils::{vec_cid_json, cid_json, bytes_json, bigint_json};
+use super::tipset::TipSet;
 
 pub type ChainEpoch = i64;
 
@@ -66,4 +67,19 @@ pub struct BlockHeader {
     #[serde(skip)]
     validated: bool, // true if the signature has been validated
     */
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum HeadChangeType {
+    Revert,
+    Apply,
+    Current,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct HeadChange {
+    pub r#type: HeadChangeType,
+    pub val: TipSet,
 }

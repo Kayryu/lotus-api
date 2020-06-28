@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use num_bigint::{BigInt};
-use super::utils::{bigint_json, bytes_json};
+use cid::Cid;
+use super::utils::{bigint_json, bytes_json, vec_cid_json, cid_json};
 use super::crypto::Signature;
 use super::address::Address;
 use super::bytes::Bytes;
@@ -55,6 +56,30 @@ pub struct MessageReceipt {
     /// The used number of gas.
     #[serde(with = "bigint_json")]
     pub gas_used: BigInt,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct BlockMessages {
+    pub bls_messages: Vec<UnsignedMessage>,
+    pub secpk_messages: Vec<SignedMessage>,
+    #[serde(with = "vec_cid_json")]
+    pub cids: Vec<Cid>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ParentMessage {
+    #[serde(with = "cid_json")]
+    pub cid: Cid,
+    pub message: UnsignedMessage,
+}
+
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct ObjStat {
+    pub size: u64,
+    pub links: u64,
 }
 
 #[cfg(test)]

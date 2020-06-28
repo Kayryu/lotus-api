@@ -6,6 +6,11 @@ use std::fmt;
 pub mod bigint_json {
     use num_bigint::BigInt;
     use serde::{de, ser, Deserialize, Serialize};
+
+    #[derive(Deserialize, Serialize)]
+    #[serde(transparent)]
+    pub struct BigIntWrapper(#[serde(with = "self")] pub BigInt);
+
     /// JSON serialization
     pub fn serialize<S>(int: &BigInt, serializer: S) -> Result<S::Ok, S::Error>
         where
