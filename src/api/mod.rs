@@ -1,8 +1,10 @@
 mod common;
 mod chain;
+mod wallet;
 
 pub use common::CommpnApi;
 pub use chain::ChainApi;
+pub use wallet::WalletApi;
 
 
 use crate::transports::{Http, Transport};
@@ -37,3 +39,4 @@ impl JsonApi for Http {
 
 impl CommpnApi for Http {}
 impl ChainApi for Http {}
+impl WalletApi for Http {}

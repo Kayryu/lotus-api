@@ -1,4 +1,4 @@
-use serde::{de, ser, Serialize, Deserialize};
+use serde::{de, ser};
 use super::utils::bytes_json;
 
 #[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Debug, Hash, Default)]

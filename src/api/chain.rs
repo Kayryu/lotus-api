@@ -1,11 +1,9 @@
 use super::JsonApi;
 use crate::error::Result;
 use crate::helper;
-use cid::Cid;
-use num_bigint::BigInt;
 use crate::types::{Bytes, TipSet, DomainSeparationTag, ChainEpoch, Randomness, BytesRef, TipSetKey,
                    BlockHeader, CidJsonRef, BlockMessages, MessageReceipt, ParentMessage, ObjStat,
-                   BigIntWrapper, UnsignedMessage, HeadChange};
+                   BigIntWrapper, UnsignedMessage, HeadChange, BigInt, Cid};
 
 #[async_trait::async_trait]
 pub trait ChainApi: JsonApi {

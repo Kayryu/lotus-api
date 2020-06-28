@@ -1,4 +1,4 @@
-use serde::{de::{self, SeqAccess, Visitor}, ser};
+use serde::{de::{self, SeqAccess, Visitor}};
 use serde::Deserialize;
 use std::marker::PhantomData;
 use std::fmt;
@@ -10,6 +10,12 @@ pub mod bigint_json {
     #[derive(Deserialize, Serialize)]
     #[serde(transparent)]
     pub struct BigIntWrapper(#[serde(with = "self")] pub BigInt);
+
+    impl BigIntWrapper {
+        pub fn into_inner(self) -> BigInt {
+            self.0
+        }
+    }
 
     /// JSON serialization
     pub fn serialize<S>(int: &BigInt, serializer: S) -> Result<S::Ok, S::Error>
@@ -146,7 +152,7 @@ impl<'de, T, D> Visitor<'de> for GoVecVisitor<T, D>
 
 pub mod vec_cid_json {
     use cid::Cid;
-    use serde::{de, ser, Deserialize, Serialize};
+    use serde::{de, ser};
     use super::cid_json::*;
     use super::GoVecVisitor;
     use serde::ser::SerializeSeq;
@@ -170,79 +176,54 @@ pub mod vec_cid_json {
     }
 }
 
-/// A wrapper of `libp2p_core::PeerId` that implement CBOR and JSON serialization/deserialization.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct PeerIdWrapper(libp2p_core::PeerId);
-
-impl PeerIdWrapper {
-    /// Consumes the wrapper, returning the underlying libp2p_core::PeerId.
-    pub fn into_inner(self) -> libp2p_core::PeerId {
-        self.0
-    }
-
-    /// Don't consume the wrapper, borrowing the underlying libp2p_core::PeerId.
-    pub fn as_inner(&self) -> &libp2p_core::PeerId {
-        &self.0
-    }
-
-    /// Don't consume the wrapper, mutable borrowing the underlying libp2p_core::PeerId.
-    pub fn as_mut_inner(&mut self) -> &mut libp2p_core::PeerId {
-        &mut self.0
-    }
-}
-
-impl From<libp2p_core::PeerId> for PeerIdWrapper {
-    fn from(peer_id: libp2p_core::PeerId) -> Self {
-        Self(peer_id)
-    }
-}
-
-impl ser::Serialize for PeerIdWrapper {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: ser::Serializer,
-    {
-        peerid_json::serialize(self.as_inner(), serializer)
-    }
-}
-
-// Implement JSON deserialization for PeerIdWrapper.
-impl<'de> de::Deserialize<'de> for PeerIdWrapper {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: de::Deserializer<'de>,
-    {
-        Ok(Self(peerid_json::deserialize(deserializer)?))
-    }
-}
-
-pub struct PeerIdRefWrapper<'a>(&'a libp2p_core::PeerId);
-
-impl<'a> PeerIdRefWrapper<'a> {
-    /// Don't consume the wrapper, borrowing the underlying libp2p_core::PeerId.
-    pub fn as_inner(&self) -> &libp2p_core::PeerId {
-        self.0
-    }
-}
-
-impl<'a> From<&'a libp2p_core::PeerId> for PeerIdRefWrapper<'a> {
-    fn from(peer_id: &'a libp2p_core::PeerId) -> Self {
-        Self(peer_id)
-    }
-}
-
-impl<'a> ser::Serialize for PeerIdRefWrapper<'a> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: ser::Serializer,
-    {
-        peerid_json::serialize(self.as_inner(), serializer)
-    }
-}
-
 pub mod peerid_json {
     use libp2p_core::PeerId;
     use serde::{de, ser, Deserialize, Serialize};
+
+    /// A wrapper of `libp2p_core::PeerId` that implement CBOR and JSON serialization/deserialization.
+    #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
+    #[serde(transparent)]
+    pub struct PeerIdWrapper(#[serde(with = "self")] pub libp2p_core::PeerId);
+
+    impl PeerIdWrapper {
+        /// Consumes the wrapper, returning the underlying libp2p_core::PeerId.
+        pub fn into_inner(self) -> libp2p_core::PeerId {
+            self.0
+        }
+
+        /// Don't consume the wrapper, borrowing the underlying libp2p_core::PeerId.
+        pub fn as_inner(&self) -> &libp2p_core::PeerId {
+            &self.0
+        }
+
+        /// Don't consume the wrapper, mutable borrowing the underlying libp2p_core::PeerId.
+        pub fn as_mut_inner(&mut self) -> &mut libp2p_core::PeerId {
+            &mut self.0
+        }
+    }
+
+    impl From<libp2p_core::PeerId> for PeerIdWrapper {
+        fn from(peer_id: libp2p_core::PeerId) -> Self {
+            Self(peer_id)
+        }
+    }
+
+    #[derive(Serialize)]
+    #[serde(transparent)]
+    pub struct PeerIdRefWrapper<'a>(#[serde(with = "self")] pub &'a libp2p_core::PeerId);
+
+    impl<'a> PeerIdRefWrapper<'a> {
+        /// Don't consume the wrapper, borrowing the underlying libp2p_core::PeerId.
+        pub fn as_inner(&self) -> &libp2p_core::PeerId {
+            self.0
+        }
+    }
+
+    impl<'a> From<&'a libp2p_core::PeerId> for PeerIdRefWrapper<'a> {
+        fn from(peer_id: &'a libp2p_core::PeerId) -> Self {
+            Self(peer_id)
+        }
+    }
 
     /// JSON serialization
     pub fn serialize<S>(peer_id: &PeerId, serializer: S) -> Result<S::Ok, S::Error>
@@ -263,10 +244,3 @@ pub mod peerid_json {
         Ok(peer_id)
     }
 }
-//use serde::{de, ser, Deserialize, Serialize};
-//#[derive(Serialize, Deserialize)]
-//struct TT {
-//    #[serde(with = "cid_json")]
-//    cid: cid::Cid,
-//}
-

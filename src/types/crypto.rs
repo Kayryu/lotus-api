@@ -1,4 +1,4 @@
-use serde::{de, ser, Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use serde_repr::{Serialize_repr, Deserialize_repr};
 use std::convert::TryFrom;
 use thiserror::Error;
