@@ -12,6 +12,7 @@ pub struct TipSet {
     height: ChainEpoch,
 }
 
+#[derive(Clone, Debug)]
 pub struct TipSetKey {
     cids: Vec<Cid>,
 }

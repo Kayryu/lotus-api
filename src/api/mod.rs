@@ -1,11 +1,16 @@
 mod common;
 mod chain;
 mod wallet;
+mod sync;
+mod mpool;
+mod miner;
 
 pub use common::CommpnApi;
 pub use chain::ChainApi;
 pub use wallet::WalletApi;
-
+pub use sync::SyncApi;
+pub use mpool::MpoolApi;
+pub use miner::MinerApi;
 
 use crate::transports::{Http, Transport};
 use crate::error::Result;
@@ -40,3 +45,6 @@ impl JsonApi for Http {
 impl CommpnApi for Http {}
 impl ChainApi for Http {}
 impl WalletApi for Http {}
+impl SyncApi for Http {}
+impl MpoolApi for Http {}
+impl MinerApi for Http {}

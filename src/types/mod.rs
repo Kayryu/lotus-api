@@ -14,6 +14,10 @@ pub mod common;
 pub mod version;
 pub mod tipset;
 pub mod keystore;
+pub mod sync;
+pub mod mpool;
+pub mod miner;
+pub mod sector;
 
 pub use num_bigint::BigInt;
 pub use cid::Cid;
@@ -31,3 +35,8 @@ pub use message::{BlockMessages, MessageReceipt, ParentMessage, UnsignedMessage,
 pub use address::Address;
 pub use crypto::{SignatureType, Signature};
 pub use keystore::KeyInfo;
+pub use sync::{SyncState, SyncStateStage, ActiveSync};
+pub use block::BlockMsg;
+pub use mpool::{MpoolChange, MpoolUpdate};
+pub use miner::{MiningBaseInfo, BlockTemplate};
+pub use sector::{SectorSize};
