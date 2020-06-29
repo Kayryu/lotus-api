@@ -52,7 +52,7 @@ pub mod bytes_json {
         where
             D: de::Deserializer<'de>,
     {
-        base64::decode(String::deserialize(deserializer)?)
+        base64::decode(&String::deserialize(deserializer)?)
             .map_err(|err| de::Error::custom(format!("base64 decode error: {}", err)))
     }
 }

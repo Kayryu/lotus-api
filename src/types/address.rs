@@ -387,7 +387,7 @@ fn base32_decode(input: impl AsRef<[u8]>) -> Result<Vec<u8>, AddressError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Address, Network};
+    use super::{Address};
 
     #[test]
     fn address_json_serde() {
