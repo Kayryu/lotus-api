@@ -18,6 +18,8 @@ pub mod sync;
 pub mod mpool;
 pub mod miner;
 pub mod sector;
+pub mod deal;
+pub mod piece;
 
 pub use num_bigint::BigInt;
 pub use cid::Cid;
@@ -40,3 +42,4 @@ pub use block::BlockMsg;
 pub use mpool::{MpoolChange, MpoolUpdate};
 pub use miner::{MiningBaseInfo, BlockTemplate};
 pub use sector::{SectorSize};
+pub use deal::{Import, DealInfo, StartDealParams, QueryOffer, RetrievalOrder, CommPRet, FileRef};

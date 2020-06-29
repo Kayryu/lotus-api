@@ -4,6 +4,7 @@ mod wallet;
 mod sync;
 mod mpool;
 mod miner;
+mod client;
 
 pub use common::CommpnApi;
 pub use chain::ChainApi;
@@ -11,6 +12,7 @@ pub use wallet::WalletApi;
 pub use sync::SyncApi;
 pub use mpool::MpoolApi;
 pub use miner::MinerApi;
+pub use client::ClientApi;
 
 use crate::transports::{Http, Transport};
 use crate::error::Result;
