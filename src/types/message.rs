@@ -35,8 +35,8 @@ pub struct UnsignedMessage {
     #[serde(with = "bigint_json")]
     pub gas_price: BigInt,
     /// The limit of gas.
-    #[serde(with = "bigint_json")]
-    pub gas_limit: BigInt,
+   // #[serde(with = "bigint_json")]
+    pub gas_limit: u64,
     /// The method.
     pub method: u64,
     /// The params of method.

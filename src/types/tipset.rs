@@ -7,9 +7,9 @@ use super::header::{BlockHeader, ChainEpoch};
 #[serde(rename_all = "PascalCase")]
 pub struct TipSet {
     #[serde(with = "vec_cid_json")]
-    cids: Vec<Cid>,
-    blocks: Vec<BlockHeader>,
-    height: ChainEpoch,
+    pub cids: Vec<Cid>,
+    pub blocks: Vec<BlockHeader>,
+    pub height: ChainEpoch,
 }
 
 #[derive(Clone, Debug)]

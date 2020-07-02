@@ -863,6 +863,7 @@ dependencies = [
  "libsecp256k1",
  "log",
  "num-bigint",
+ "num-traits",
  "reqwest",
  "serde",
  "serde_json",
