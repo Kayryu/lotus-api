@@ -5,7 +5,7 @@ use std::fmt::{self, Display};
 use std::convert::TryFrom;
 use super::constants::*;
 
-pub static NETWORK_DEFAULT:Network = Network::Main;
+pub static NETWORK_DEFAULT:Network = Network::Test;
 
 /// The network type used by the address.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Hash)]

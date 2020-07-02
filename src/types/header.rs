@@ -32,7 +32,7 @@ pub struct BlockHeader {
     ///
     pub election_proof: ElectionProof,
     ///
-    pub beacon_entries: Vec<BeaconEntry>,
+    pub beacon_entries: Option<Vec<BeaconEntry>>,
     ///
     #[serde(rename = "WinPoStProof")]
     pub win_post_proof: Vec<PoStProof>,
@@ -82,4 +82,17 @@ pub enum HeadChangeType {
 pub struct HeadChange {
     pub r#type: HeadChangeType,
     pub val: TipSet,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn block_header_json() {
+        let json = r#"{"Miner":"t01000","Ticket":{"VRFProof":"k4aywRis+mYWN56o3OQOAxEFxKSp777TR1h8hcTEeWlLwvERi2oXnTE7xzS0uoLICnEhoGs9BL5MGDYpf3dfmvLD+h7iBimSpl6rY7bysDbuKreKXa9GwAPN3fQqJB1O"},"ElectionProof":{"VRFProof":"g7Ki1qDQtj0Q1o2bRpHZqD++UqFfjPaOJ5WYT2wJjCgGxg/+2L4cozSU/F7IzGIfE1E79C0brMGROGCLMui4qiSZr1D9sJmn+EBwrLjbqpiJEVXqoXoFEkw7/xpFjIat"},"BeaconEntries":null,"WinPoStProof":[{"RegisteredProof":9,"ProofBytes":"scKG734ZjZjlLv1I9z/7R4qmL3M0kpkTKtBa00pGVxA8cd3myhwhocX8BL4pHl8QmMbkPqp5iXh0sbCdJjbJ6/OmAvpATiAYf3R7pTMOdkLvxFofq4NDEtv8t/I4fnOJAcTvG0ozeNA3MM0KjR2X+kfz4Fo4kVflCdhcT9cKlYBO7IiVKYm/RN0zyvJi6pzhmBtryhGzYyNYv3jWVde8qUtIQnD0169SzYVrbZlfF4ydpgGj5PriYRXrCTi9DXmz"}],"Parents":[{"/":"bafy2bzacebwut2il7udv5d3yzscpwbomvj5ocq6lkxh4kcusiy5juesvpun4c"}],"ParentWeight":"629642112","Height":149063,"ParentStateRoot":{"/":"bafy2bzaceae7pqh2wupmp3fqnlbsxx2czjku5rbisl3qdtaa5mehs2hkjak3a"},"ParentMessageReceipts":{"/":"bafy2bzaceaa43et73tgxsoh2xizd4mxhbrcfig4kqp25zfa5scdgkzppllyuu"},"Messages":{"/":"bafy2bzacecgw6dqj4bctnbnyqfujltkwu7xc7ttaaato4i5miroxr4bayhfea"},"BLSAggregate":{"Type":2,"Data":"wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"},"Timestamp":1592693392,"BlockSig":{"Type":2,"Data":"l+3ZTa9Q1mj8UcVMAetZSuZphQQJUDfaSbXbZf6rNTBhrqE7feLMcTCCMcUOClNnFH+P8HQmOZ8YwH47vU2vw6maLU33bS5Bc6+MvF7gjFx2pRHgq5GM8SPunDA3fKFe"},"ForkSignaling":0}"#;
+
+        let block_header = serde_json::from_str::<BlockHeader>(json);
+        println!("{:?}", block_header);
+    }
 }

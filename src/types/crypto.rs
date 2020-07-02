@@ -5,8 +5,8 @@ use thiserror::Error;
 use super::bytes::Bytes;
 use super::address::Protocol;
 
-#[derive(Eq, PartialEq, Debug, Clone, Copy, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[repr(u8)]
+#[derive(Eq, PartialEq, Debug, Clone, Copy, Hash, Serialize_repr, Deserialize_repr)]
 pub enum SignatureType {
     /// The `Secp256k1` signature.
     Secp256k1 = 1,
@@ -87,6 +87,7 @@ mod tests {
     use super::Signature;
     use crate::types::crypto::{SignatureType, Bytes};
     use serde_json;
+
     #[test]
     fn signature_json_serde() {
         let s = Signature {
