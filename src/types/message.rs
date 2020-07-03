@@ -6,7 +6,11 @@ use super::crypto::Signature;
 use super::address::Address;
 use super::bytes::Bytes;
 
-use plum_message;
+use plum_message::UnsignedMessage as originUnsignedMessage;
+use plum_address::Address as originAddress;
+use plum_bigint::BigInt as originBigint;
+use plum_bytes::Bytes as originBytes;
+
 /// The signed message (a message with signature).
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -24,17 +28,17 @@ pub struct UnsignedMessage {
     ///
     pub version: i64,
     /// The receiver of the unsigned message.
-    pub to: Address,
+    pub to: originAddress,
     /// The sender of the unsigned message.
-    pub from: Address,
+    pub from: originAddress,
     /// The nonce.
     pub nonce: u64,
     /// The value.
     #[serde(with = "bigint_json")]
-    pub value: BigInt,
+    pub value: originBigint,
     /// The price of gas.
     #[serde(with = "bigint_json")]
-    pub gas_price: BigInt,
+    pub gas_price: originBigint,
     /// The limit of gas.
    // #[serde(with = "bigint_json")]
     pub gas_limit: u64,
@@ -42,7 +46,7 @@ pub struct UnsignedMessage {
     pub method: u64,
     /// The params of method.
 //    #[serde(with = "bytes")]
-    pub params: Bytes,
+    pub params: originBytes,
 }
 
 /// The receipt of applying message.
@@ -83,6 +87,21 @@ pub struct ObjStat {
     pub links: u64,
 }
 
+impl UnsignedMessage {
+    fn into_origin(&self) -> originUnsignedMessage {
+        originUnsignedMessage{
+            version: self.version,
+            to:  self.to.clone(),
+            from: self.from.clone(),
+            nonce: self.nonce,
+            value: self.value.clone(),
+            gas_price: self.gas_price.clone(),
+            gas_limit: originBigInt::from(self.gas_limit as u64),
+            method:  self.method,
+            params: self.params,
+        }
+    }
+}
 #[cfg(test)]
 mod tests {
 

@@ -31,3 +31,6 @@ libp2p-core = "0.16.0"
 
 num-traits = "0.2.12"
 plum_message = { version = "0.1.0" , git = "https://github.com/prz23/plum" }
+plum_address = { version = "0.1.0" , git = "https://github.com/prz23/plum" }
+plum_bigint = { version = "0.1.0" , git = "https://github.com/prz23/plum" }
+plum_bytes = { version = "0.1.0" , git = "https://github.com/prz23/plum" }
