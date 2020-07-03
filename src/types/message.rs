@@ -89,7 +89,7 @@ pub struct ObjStat {
 }
 
 impl UnsignedMessage {
-    fn into_origin(&self) -> originUnsignedMessage {
+    pub fn into_origin(&self) -> originUnsignedMessage {
         originUnsignedMessage{
             version: self.version,
             to:  self.to.clone(),
@@ -103,7 +103,7 @@ impl UnsignedMessage {
         }
     }
 
-    fn cid(&self) -> Cid {
+    pub fn cid(&self) -> Cid {
         self.into_origin().cid()
     }
 
