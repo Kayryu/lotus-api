@@ -6,11 +6,11 @@ use super::crypto::Signature;
 use super::address::Address;
 use super::bytes::Bytes;
 
-use plum_message::UnsignedMessage as originUnsignedMessage;
-use plum_address::Address as originAddress;
-use plum_bigint::{BigInt as originBigint, bigint_json as originbigint_json};
-use plum_bytes::Bytes as originBytes;
-use num_traits::cast::ToPrimitive;
+pub use plum_message::UnsignedMessage as originUnsignedMessage;
+pub use plum_address::Address as originAddress;
+pub use plum_bigint::{BigInt as originBigint, bigint_json as originbigint_json};
+pub use plum_bytes::Bytes as originBytes;
+pub use num_traits::cast::ToPrimitive;
 
 /// The signed message (a message with signature).
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Serialize, Deserialize)]
