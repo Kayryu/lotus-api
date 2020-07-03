@@ -3,7 +3,7 @@ pub mod error;
 pub mod api;
 pub mod types;
 mod helper;
-use num_traits::cast::ToPrimitive;
+pub use num_traits::cast::ToPrimitive;
 pub use transports::Http;
 
 #[cfg(test)]

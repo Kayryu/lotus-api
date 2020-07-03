@@ -6,6 +6,7 @@ use super::crypto::Signature;
 use super::address::Address;
 use super::bytes::Bytes;
 
+use plum_message;
 /// The signed message (a message with signature).
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
