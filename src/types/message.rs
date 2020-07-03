@@ -8,8 +8,9 @@ use super::bytes::Bytes;
 
 use plum_message::UnsignedMessage as originUnsignedMessage;
 use plum_address::Address as originAddress;
-use plum_bigint::BigInt as originBigint;
+use plum_bigint::{BigInt as originBigint, bigint_json as originbigint_json};
 use plum_bytes::Bytes as originBytes;
+use num_traits::cast::ToPrimitive;
 
 /// The signed message (a message with signature).
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Serialize, Deserialize)]
@@ -35,10 +36,10 @@ pub struct UnsignedMessage {
     pub nonce: u64,
     /// The value.
     #[serde(with = "bigint_json")]
-    pub value: originBigint,
+    pub value: BigInt,
     /// The price of gas.
     #[serde(with = "bigint_json")]
-    pub gas_price: originBigint,
+    pub gas_price: BigInt,
     /// The limit of gas.
    // #[serde(with = "bigint_json")]
     pub gas_limit: u64,
@@ -46,7 +47,7 @@ pub struct UnsignedMessage {
     pub method: u64,
     /// The params of method.
 //    #[serde(with = "bytes")]
-    pub params: originBytes,
+    pub params: Bytes,
 }
 
 /// The receipt of applying message.
@@ -94,14 +95,20 @@ impl UnsignedMessage {
             to:  self.to.clone(),
             from: self.from.clone(),
             nonce: self.nonce,
-            value: self.value.clone(),
-            gas_price: self.gas_price.clone(),
-            gas_limit: originBigInt::from(self.gas_limit as u64),
+            value: originBigint::from(self.value.to_u128().unwrap() as u128),
+            gas_price: originBigint::from(self.gas_price.to_u128().unwrap() as u128),
+            gas_limit: originBigint::from(self.gas_limit as u128),
             method:  self.method,
-            params: self.params,
+            params: self.params.clone().into_inner(),
         }
     }
+
+    fn cid(&self) -> Cid {
+        self.into_origin().cid()
+    }
+
 }
+
 #[cfg(test)]
 mod tests {
 
