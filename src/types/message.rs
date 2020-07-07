@@ -3,14 +3,26 @@ use num_bigint::{BigInt};
 use cid::Cid;
 use super::utils::{bigint_json, bytes_json, vec_cid_json, cid_json};
 use super::crypto::Signature;
-use super::address::Address;
+use super::address::{Address,Protocol};
 use super::bytes::Bytes;
 
 pub use plum_message::UnsignedMessage as originUnsignedMessage;
 pub use plum_address::Address as originAddress;
+pub use plum_address::Protocol as originProtocol;
 pub use plum_bigint::{BigInt as originBigint, bigint_json as originbigint_json};
 pub use plum_bytes::Bytes as originBytes;
 pub use num_traits::cast::ToPrimitive;
+
+
+impl originAddress {
+    pub fn to_api_address(self){
+        let p :u64 = self.protocol().into();
+        Address{
+            protocol: p.into(),
+            payload: self.payload().to_vec(),
+        };
+    }
+}
 
 /// The signed message (a message with signature).
 #[derive(Eq, PartialEq, Clone, Debug, Hash, Serialize, Deserialize)]
