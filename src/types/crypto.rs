@@ -70,6 +70,14 @@ pub struct Signature {
     data: Bytes,
 }
 
+impl Signature {
+    pub fn new_secp(sig:Vec<u8>) -> Self{
+        Self{
+            r#type: SignatureType::Secp256k1,
+            data: Bytes::from(sig)
+        }
+    }
+}
 #[repr(u8)]
 #[derive(Clone, Debug, Serialize_repr, Deserialize_repr)]
 pub enum DomainSeparationTag {
