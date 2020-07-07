@@ -14,7 +14,7 @@ pub use plum_bytes::Bytes as originBytes;
 pub use num_traits::cast::ToPrimitive;
 use std::convert::TryFrom;
 
-trait AddressConver {
+pub trait AddressConver {
     fn to_api_address(self) -> Address;
 }
 
