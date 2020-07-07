@@ -12,15 +12,19 @@ pub use plum_address::Protocol as originProtocol;
 pub use plum_bigint::{BigInt as originBigint, bigint_json as originbigint_json};
 pub use plum_bytes::Bytes as originBytes;
 pub use num_traits::cast::ToPrimitive;
+use std::convert::TryFrom;
 
+trait AddressConver {
+    fn to_api_address(self) -> Address;
+}
 
-impl originAddress {
-    pub fn to_api_address(self){
-        let p :u64 = self.protocol().into();
-        Address{
-            protocol: p.into(),
-            payload: self.payload().to_vec(),
-        };
+impl AddressConver for originAddress {
+     fn to_api_address(self) -> Address{
+        let p  = self.protocol() as u8;
+        Address::new(
+             Protocol::try_from(p).unwrap() ,
+             self.payload().to_vec(),
+        ).unwrap()
     }
 }
 
