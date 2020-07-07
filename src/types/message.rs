@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use num_bigint::{BigInt};
+pub use num_bigint::{BigInt};
 use cid::Cid;
 use super::utils::{bigint_json, bytes_json, vec_cid_json, cid_json};
 use super::crypto::Signature;
