@@ -23,7 +23,7 @@ serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.10", features = ["json"] }
 tokio = { version = "0.2.5", features = ["macros"] }
 
-cid = { version ="0.5.0", git = "https://github.com/PolkaX/rust-cid", branch = "impl-cbor-and-json" }
+cid = { version ="0.5", git = "https://github.com/PolkaX/rust-cid", branch = "impl-cbor-and-json-ext" }
 num-bigint = "0.3.0"
 fixed-hash = "0.6"
 
